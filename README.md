@@ -161,7 +161,7 @@ You can see the reports by running the code yourself.
 # Conclusion
 This was a fun little dive into Rust and a nice way to challenge my own assumptions because I did expect the logical operator (the none if) version to be faster by a measurable amount. 
 
-Turns out, its not... well not properly measurable anyway. Which leads me to believe the rust compiler is clever enough to optimise the if statement perfectly well and attempting this micro optimisation was a fools errand. Perhaps its still good to keep in mind for if I ever find myself working in GLES shaders again.... possibly :p 
+Turns out, its not... well not properly measurable anyway. Which shows the rust compiler is clever enough to optimise the if statement perfectly well and attempting this micro optimisation was a fools errand. Perhaps its still good to keep in mind for if I ever find myself working in GLES shaders again.... possibly :p 
 
 But as always, premature optimisation is the route of all evil and you should always profile, benchmark and repeat! ( basically TDD it :p )
 
