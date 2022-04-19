@@ -156,7 +156,7 @@ I very much expected the "IF" version to win out on the under 18s (as its a very
 EDIT
 I realised the code was wrong, so I fixed it and ran it again. This time the logical version was slower on "16", "18", "25" and "28". No logical reason I can think of. So again i think its just when they are *that* close in performance, a bit of variance is expected.
 
-You can see the reports by running the code yourself.
+You can see the reports by running the code yourself or by opening [this](BenchmarkReport.rs.pdf)
 
 # Conclusion
 This was a fun little dive into Rust and a nice way to challenge my own assumptions because I did expect the logical operator (the none if) version to be faster by a measurable amount. 
