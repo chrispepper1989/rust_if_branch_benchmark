@@ -1,32 +1,59 @@
 # Rust if branch benchmark
+
+
+
+
 ## Overview
-I wanted to see if a hunch was right about if statements vs casting was correct. I was mostly wrong :). 
+I wanted to see if a hunch was right about if statements vs maths (and casting) was correct. Turns out I was *mostly* wrong :). 
 
-This was a valuable reminder in how we should trust the compiler to optimise, how every language is different and what you remember about hyper optimised code from a few years ago, is never a good substitute for proper *profiling* and *benchmarking* with the specific problem you have now! 
+This was a valuable reminder in how we should trust the compiler to optimise, how every language is different and what you remember about hyper optimised code from a few years ago, is never a good substitute for proper **profiling** and **benchmarking** with the specific problem you have now! 
 
-## How to run
-You will need to install rust: https://www.rust-lang.org/learn/get-started
-and then from the hello-rust folder simply run:
+## Background: 
+A few years ago I was helping optimise a GLES shader for a driver we were working on, one of the suggestions was to get rid of IF statements where possible as the "conditional branch" is slower then pure maths. 
+
+Recently I came across this video https://www.youtube.com/watch?v=EumXak7TyQ0 and found myself recanting this pearl of wisdom on some tangental comment thread, as you do.
+
+"The pearl of wisdom" as I had decided to remember it was 
+> if statements = "conditional branches" = slower then simple maths. 
+
+But of course like most things, the real truth is a lot more nuanced then this.
+
+For example see this great answer on Stack Overflow specifically about OpenGL shaders (the hurdle i came across all those years ago) and how if statements can cause different kinds of conditional branches:
+https://stackoverflow.com/questions/37827216/do-conditional-statements-slow-down-shaders
+
+He explains how conditional branching splits into three categories:
+"
+
+ - **Compile-time static**. The conditional expression is entirely based off of compile-time constants. As such, you know from looking at the code which branches will be taken. Pretty much any compiler handles this as part of basic optimization.
+
+- **Statically uniform branching**. The condition is based off of expressions involving things which are known at compile-time to be constant (specifically, constants and uniform values). But the value of the expression will not be known at compile-time. So the compiler can statically be certain that wavefronts will never be broken by this if, but the compiler cannot know which branch will be taken.
+
+- **Dynamic branching**. The conditional expression contains terms other than constants and uniforms. Here, a compiler cannot tell a priority if a wavefront will be broken up or not. Whether that will need to happen depends on the runtime evaluation of the condition expression
+
+"
+He also discusses how the hardware can impact the outcome. Its worth a read in its entirity, especially if your into your shaders!
+
+## What did I do
+I decided to run a basic benchmark test in rust. 
+
+Partly because I couldn't do the direct casting I wanted in C#, but mostly because I wanted an excuse to actually play with Rust. 
+
+So *caveat* there is a high chance this is terribly written Rust code and ironically i couldn't do the direct casting in the way I wanted in Rust either :p. 
+
+## How to run the code
+If you havent already you will need to install rust: https://www.rust-lang.org/learn/get-started
+
+and then from the hello-rust (yup I never renamed it) folder simply run:
 
 > cargo run
 
 Or to run the robust benchmark run
 > cargo criterion
 
-## Background: 
-A few years ago I was helping optimise a GLES shader for a driver we were working on, one of the suggestions was to get rid of IF statements where possible as the "conditional branch" is slower then pure maths. This came up in a comment thread on this video https://www.youtube.com/watch?v=EumXak7TyQ0
-
-I had decided to remember this as if statements = "conditional branches" = slower then simple maths. But of course like most things, the real truth is a lot more nuanced then this, see this great answer on Stack Overflow specifically about OpenGL shaders and if branches:
-https://stackoverflow.com/questions/37827216/do-conditional-statements-slow-down-shaders
-
-Which explains how conditional branching splits into three categories and then we get into specifics on how hardware can impact the outcome. 
-
-## Caveat
-I decided to run a basic benchmark test in rust. Partly because I couldn't do the direct casting I wanted in C#, but mostly because I wanted an excuse to actually play with Rust. So there is a high chance this is terribly written Rust code and ironically i couldn't do the direct casting in Rust either :p. 
-
-## Actual results:
+## Some actual results:
 
 ### Long timing
+These were taken by just running the functions in a loop, using random ages, where the whole loop was timed. 
 ```
 //using sensible numbers
 over 100000
@@ -51,6 +78,8 @@ get_drinking_message_via_logical took 529534ms
 All in all neither was a clear winner and the difference between the two was often too small to notice. 
 
 ### Using averages
+
+This time I didnt time the whole loop and instead timed the inside of the loop and took averages. Of course the numbers were so small, I had to add an inner loop so i didn't just get "0" as an answer. 
 ```
 get_drinking_message_via_if average of 0.0000374ms
 get_drinking_message_via_logical took  0.0000520ms
@@ -64,7 +93,7 @@ get_drinking_message_via_logical took 0.00028ms
 With this the logical is actually shown to be slower!
 
 ### Final Custom Benchmark version 
-If you run this on your machine, you will see this result:
+If you run this code as it is today, on your machine, you will see this result:
 
 ```
 Basic benchmark
@@ -72,11 +101,23 @@ Basic benchmark
 get_drinking_message_via_if average of 0.000176ms
 get_drinking_message_via_logical took 0.000178ms
 ```
+
+This version does away with the random numbers and tries to be slightly cleaner with the averages. 
+
 Again with this the logical is actually shown to be slower!
 
-# Using Rust Criterion
-Using Rust criterion cargo for proper benchmarking
+# Using Rust Bench and Criterion
+It was at this point I finally decided to use a proper benchmarking tool.
+
+Rust comes with 
+> cargo bench
+
+Which works brilliantly and tells you some interesting stuff.
+
+I also used Rust criterion cargo to get some nice reports:
 https://crates.io/crates/criterion
+
+> cargo criterion
 
 ## with if version:
 When ran stand alone:
@@ -115,8 +156,12 @@ I very much expected the "IF" version to win out on the under 18s (as its a very
 EDIT
 I realised the code was wrong, so I fixed it and ran it again. This time the logical version was slower on "16", "18", "25" and "28". No logical reason I can think of. So again i think its just when they are *that* close in performance, a bit of variance is expected.
 
-# Conclusion
-This was a fun little dive into Rust and a nice way to challenge my own assumptions because I did expect the none if version to be faster by a measurable amount. Turns out, its not... well not measurable anyway. Which leads me to believe the rust compiler is clever enough to optimise the if statement perfectly well and attempting this micro optimisation was a fools errand. 
+You can see the reports by running the code yourself.
 
-But that its good to keep in mind for if I ever find myself working in GLES shaders again.... possibly :p 
+# Conclusion
+This was a fun little dive into Rust and a nice way to challenge my own assumptions because I did expect the logical operator (the none if) version to be faster by a measurable amount. 
+
+Turns out, its not... well not properly measurable anyway. Which leads me to believe the rust compiler is clever enough to optimise the if statement perfectly well and attempting this micro optimisation was a fools errand. Perhaps its still good to keep in mind for if I ever find myself working in GLES shaders again.... possibly :p 
+
+But as always, premature optimisation is the route of all evil and you should always profile, benchmark and repeat! ( basically TDD it :p )
 
