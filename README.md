@@ -1,13 +1,13 @@
 # rust if branch benchmark
 ## Overview
-I wanted to see if a hunch was right about if statements vs casting was correct. I was wrong :). 
+I wanted to see if a hunch was right about if statements vs casting was correct. I was mostly wrong :). 
 
-Was a valuable reminder in how we should trust the compiler to optimise, how every language is different and what you remember about hyper optimised code from a few years ago, is never a good substitute for proper *profiling* and *benchmarking*. 
+This was a valuable reminder in how we should trust the compiler to optimise, how every language is different and what you remember about hyper optimised code from a few years ago, is never a good substitute for proper *profiling* and *benchmarking* with the specific problem you have now! 
 
 ## Background: 
-A few years ago I was helping optimise a GLES shader for a driver we were working on, one of the suggestions was to get rid of IF statements where possible as the "conditional branch" is slower then pure maths. 
+A few years ago I was helping optimise a GLES shader for a driver we were working on, one of the suggestions was to get rid of IF statements where possible as the "conditional branch" is slower then pure maths. This came up in a comment thread on this video https://www.youtube.com/watch?v=EumXak7TyQ0
 
-I had decided to remember this as if statements = "conditional branches" = slower then simple maths. But of course like most things, the real truth is a lot more nuanced then this, see this great answer on Stack Overflow:
+I had decided to remember this as if statements = "conditional branches" = slower then simple maths. But of course like most things, the real truth is a lot more nuanced then this, see this great answer on Stack Overflow specifically about OpenGL shaders and if branches:
 https://stackoverflow.com/questions/37827216/do-conditional-statements-slow-down-shaders
 
 Which explains how conditional branching splits into three categories and then we get into specifics on how hardware can impact the outcome. 
@@ -54,17 +54,26 @@ With this the logical is actually shown to be slower!
 Using Rust criterion cargo for proper benchmarking
 https://crates.io/crates/criterion
 
-with if version:
+## with if version:
+```
 get_drinking_message    time:   [276.63 ps 284.54 ps 293.27 ps]
 Found 10 outliers among 100 measurements (10.00%)
   6 (6.00%) high mild
   4 (4.00%) high severe
+```
 
-with casting version:
+## with casting version:
+```
 get_drinking_message    time:   [262.24 ps 264.43 ps 266.96 ps]
                         change: [-6.6146% -4.6553% -2.7004%] (p = 0.00 < 0.05)
                         Performance has improved.
 Found 5 outliers among 100 measurements (5.00%)
   3 (3.00%) high mild
   2 (2.00%) high severe
-
+```
+then for sanity, **changed back to the if version**:
+```
+get_drinking_message    time:   [274.56 ps 281.33 ps 289.58 ps]
+                        change: [+2.2427% +4.5858% +7.0853%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+```

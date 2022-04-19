@@ -1,32 +1,17 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-const VALUES: &'static [&'static str] = &["Sorry no beer for you", "Not in the USA", "I will need to check you", "sure you can drink!"];
+use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
 
-fn get_drinking_message_via_if(_age: i32) -> &'static str {
-    if _age < 18 {
-        return  &VALUES[0];
+
+fn bench_both(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Get Drink Message");
+    for i in [15u64, 31u64].iter() {
+        group.bench_with_input(BenchmarkId::new("Via Logical", i), i, 
+            |b, i| b.iter(|| get_drinking_message_via_logical(*i)));
+        group.bench_with_input(BenchmarkId::new("Via If Statement", i), i, 
+            |b, i| b.iter(|| get_drinking_message_via_if(*i)));
     }
-    else if _age < 21 {
-        return  &VALUES[1];
-    }
-    else if _age < 25 {
-        return  &VALUES[2];
-    }
-    return  &VALUES[3];
-}
-fn get_drinking_message_via_logical(age: i32) -> &'static str{
-    let value: usize =  (age < 18) as usize + (age < 21) as usize  + (age < 25) as usize;
-    return &VALUES[value];
-}
-
-fn get_drinking_message(age: i32)
-{
-    get_drinking_message_via_logical(age);
-}
-
-fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("get_drinking_message", |b| b.iter(|| get_drinking_message(black_box(20))));
+    group.finish();
 }
 
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, bench_both);
 criterion_main!(benches);
