@@ -35,15 +35,16 @@ They explain how conditional branching splits into three categories:
 
 They also discusses how the hardware can impact the outcome. Its worth a read in its entirity, especially if your into your shaders!
 
-## What did I do
-I decided to run a basic benchmark test in rust. 
+## So what did I do
+I wanted to run a basic benchmark test in Rust. 
 
-Partly because I couldn't do the direct casting I wanted in C#, but mostly because I wanted an excuse to actually play with Rust. 
+Partly because I couldn't do the direct casting I wanted in C#, but mostly because I wanted an excuse to actually play with Rust and I like to remember C++ through rose tinted glasses rather then facing its modern syntax.  
 
-So *caveat* there is a high chance this is terribly written Rust code and ironically i couldn't do the direct casting in the way I wanted in Rust either :p. 
+So *caveat* there is a high chance this is terribly written Rust code and ironically I couldn't even do the direct casting in the way I wanted in Rust either :p ( C++ can take that as a win, I guess :D ). 
 
 ## How to run the code
-If you havent already you will need to install rust: https://www.rust-lang.org/learn/get-started
+If you haven't already you will need to install rust: 
+> https://www.rust-lang.org/learn/get-started
 
 and then from the hello-rust (yup I never renamed it) folder simply run:
 
@@ -55,7 +56,8 @@ Or to run the robust benchmark run
 ## Some actual results:
 
 ### Long timing
-These were taken by just running the functions in a loop, using random ages, where the whole loop was timed. 
+These were taken by just running the functions in a loop, using random ages, where the whole loop was timed:
+
 ```
 //using sensible numbers
 over 100000
@@ -81,7 +83,8 @@ All in all neither was a clear winner and the difference between the two was oft
 
 ### Using averages
 
-This time I didnt time the whole loop and instead timed the inside of the loop and took averages. Of course the numbers were so small, I had to add an inner loop so i didn't just get "0" as an answer. 
+Clearly annoyed that the "basic dumb test" above didnt prove me right, this time I didn't time the whole loop and instead timed the inside of the loop and took averages. Of course the numbers were so small, I had to add an inner loop so i didn't just get "0" as an answer: 
+
 ```
 get_drinking_message_via_if average of 0.0000374ms
 get_drinking_message_via_logical took  0.0000520ms
@@ -95,7 +98,7 @@ get_drinking_message_via_logical took 0.00028ms
 With this the logical is actually shown to be slower!
 
 ### Final Custom Benchmark version 
-If you run this code as it is today, on your machine, you will see this result:
+I did a couple more iterations and if you run this code as it is today, on your machine, you will see this result:
 
 ```
 Basic benchmark
@@ -106,19 +109,22 @@ get_drinking_message_via_logical took 0.000178ms
 
 This version does away with the random numbers and tries to be slightly cleaner with the averages. 
 
-Again with this the logical is actually shown to be slower!
+However once again, with this the logical is actually shown to be slower!
 
 # Using Rust Bench and Criterion
-It was at this point I finally decided to use a proper benchmarking tool.
+It was at this point I finally decided to use a proper benchmarking tool (as you always should dear reader).
 
-Rust comes with 
+Rust comes with [its own benchmarking option ](https://doc.rust-lang.org/cargo/commands/cargo-bench.html)
 > cargo bench
 
-Which works brilliantly and tells you some interesting stuff.
+Which works brilliantly and tells you some interesting stuff. 
+
+To set it up, I created a "benches" folder and added a file in there. I had some trouble figuring out how to import the functions from another folder, so I cheated and copied them over. One to add to my list of things that "I still don't know about rust". *I'm assuming its because the "cargo bench" (benches folder) ends up in a seperate runnable assembly then the "cargo build" (src folder) assembly*. 
 
 I also used Rust criterion cargo to get some nice reports:
 https://crates.io/crates/criterion
 
+which you can run with:
 > cargo criterion
 
 ## with if version:
@@ -132,7 +138,7 @@ Found 10 outliers among 100 measurements (10.00%)
 ```
 
 ## with casting version:
-When ran stand alone directly after:
+When ran stand alone directly after, swapping the "if" version for the "logical calculation" version:
 
 ```
 get_drinking_message    time:   [262.24 ps 264.43 ps 266.96 ps]
@@ -148,15 +154,18 @@ get_drinking_message    time:   [274.56 ps 281.33 ps 289.58 ps]
                         change: [+2.2427% +4.5858% +7.0853%] (p = 0.00 < 0.05)
                         Performance has regressed.
 ```
-So this implies that the logical version is in fact faster! Just by very very little.
+So this implies that the logical version is in fact faster! Just by very very little: "5%". *Also when I ran this test I only ran it against 15 and 31 due to my own misunderstanding of "black_box" from the examples.*
 
 ## using a more robust benchmark
-Using Criterion I generated a more robust report, which really brought home how variable the results can be when the functions are so close in actual performance. It makes sense that they vary based on parameter (probably why my custom benchmark shouldn't use random) however i'm not entirely sure I understand why it varies as it does. 
+Using Criterion I generated a more robust report, that compared both directly, that is the version of the benchmark you will now see in [branch_benchmark.rs](hello-rust\benches\branch_benchmark.rs)
+
+The resulting report really brought home how variable the results can be when the functions are so close in actual performance. It makes sense that they vary based on parameter (this is why I changed my custom benchmark to not use random) however i'm not entirely sure I understand why it varies as it does. 
 
 I very much expected the "IF" version to win out on the under 18s (as its a very early return) but actually the "logical operator" version only loses out on "17", "20" and "27" which...makes no sense to me.
 
-EDIT
-I realised the code was wrong, so I fixed it and ran it again. This time the logical version was slower on "16", "18", "25" and "28". No logical reason I can think of. So again i think its just when they are *that* close in performance, a bit of variance is expected.
+Of course then...I realised the code was wrong! So I fixed it and ran it again. 
+
+This time the logical version was slower on "16", "18", "25" and "28". No logical reason I can think of. So again I think its just when they are *that* close in performance, a bit of variance is normal. Re-running the benchmark does seem to back this up.
 
 You can see the reports by running the code yourself or by opening [this](BenchmarkReport.rs.pdf)
 
@@ -165,5 +174,5 @@ This was a fun little dive into Rust and a nice way to challenge my own assumpti
 
 Turns out, its not... well not properly measurable anyway. Which shows the rust compiler is clever enough to optimise the if statement perfectly well and attempting this micro optimisation was a fools errand. Perhaps its still good to keep in mind for if I ever find myself working in GLES shaders again.... possibly :p 
 
-But as always, premature optimisation is the route of all evil and you should always profile, benchmark and repeat! ( basically TDD it :p )
+But as always, premature optimisation is the route of all evil and you should always favour readable code and then when needed profile, benchmark, refactor and repeat! ( basically TDD it :D )
 
