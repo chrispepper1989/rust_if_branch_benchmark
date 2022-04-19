@@ -48,6 +48,9 @@ get_drinking_message_via_logical took  0.0000520ms
 get_drinking_message_via_if average of 0.0000212ms
 get_drinking_message_via_logical took 0.0000544ms
 
+get_drinking_message_via_if average of 0.000012ms
+get_drinking_message_via_logical took 0.00028ms
+
 With this the logical is actually shown to be slower!
 
 # using Rust Criterion

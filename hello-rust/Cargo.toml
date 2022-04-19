@@ -13,4 +13,5 @@ criterion = "0.3"
 [[bench]]
 name = "branch_benchmark"
 harness = false
+html_reports = true
 
