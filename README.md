@@ -18,10 +18,11 @@ Recently I came across this video https://www.youtube.com/watch?v=EumXak7TyQ0 an
 
 But of course like most things, the real truth is a lot more nuanced then this.
 
-For example see this great answer on Stack Overflow specifically about OpenGL shaders (the hurdle i came across all those years ago) and how if statements can cause different kinds of conditional branches:
-https://stackoverflow.com/questions/37827216/do-conditional-statements-slow-down-shaders
+For example see this [great answer on Stack Overflow](https://stackoverflow.com/questions/37827216/do-conditional-statements-slow-down-shaders) specifically about OpenGL shaders (the hurdle i came across all those years ago) and how if statements can cause different kinds of conditional branches:
 
-He explains how conditional branching splits into three categories:
+
+They explain how conditional branching splits into three categories:
+
 "
 
  - **Compile-time static**. The conditional expression is entirely based off of compile-time constants. As such, you know from looking at the code which branches will be taken. Pretty much any compiler handles this as part of basic optimization.
@@ -31,7 +32,8 @@ He explains how conditional branching splits into three categories:
 - **Dynamic branching**. The conditional expression contains terms other than constants and uniforms. Here, a compiler cannot tell a priority if a wavefront will be broken up or not. Whether that will need to happen depends on the runtime evaluation of the condition expression
 
 "
-He also discusses how the hardware can impact the outcome. Its worth a read in its entirity, especially if your into your shaders!
+
+They also discusses how the hardware can impact the outcome. Its worth a read in its entirity, especially if your into your shaders!
 
 ## What did I do
 I decided to run a basic benchmark test in rust. 
